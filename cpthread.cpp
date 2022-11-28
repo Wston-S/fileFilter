@@ -10,7 +10,7 @@ CpThread::CpThread(QObject * parent) : QObject(parent)
     connect(mywork, SIGNAL(FinishworkSig(int)), this, SLOT(waitCpOver(int)));
     connect(&mycpThread, &QThread::finished, mywork, &QObject::deleteLater);
     connect(this, SIGNAL(startCpSignal(int)), mywork, SLOT(doMyWorker(int)));
-
+    connect(this, SIGNAL(startSearchSignal(QStringList)), mywork, SLOT(doMySearchWorker(int)));
 
     qDebug()<<"------QThread moveToThread Demo-----";
 
@@ -27,4 +27,10 @@ void CpThread::startCpWork()
 {
     qDebug()<<"startCpWork"<<endl;
     emit startCpSignal(1);
+}
+
+void CpThread::startSearchWork(QStringList list)
+{
+    qDebug()<<"startSearchWork"<<endl;
+    emit startSearchSignal(list);
 }

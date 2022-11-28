@@ -31,6 +31,24 @@ public slots:
         emit FinishworkSig(123);
     }
 
+    void doMySearchWorker(QStringList list)
+    {
+        while (true)
+        {
+            static int cnt = 0;
+
+            qDebug()<<" do my Search work: "<<cnt++<<", my thread id is "<<QThread::currentThreadId();
+            QThread::sleep(1);
+
+            if(cnt >= 10)
+            {
+                break;
+            }
+        }
+
+        emit FinishworkSig(1);
+    }
+
 signals:
     void FinishworkSig(int);
 

@@ -15,10 +15,12 @@ public:
 
    QThread mycpThread;
 
+   void startSearchWork(QStringList list);
    void startCpWork();
 
 signals:
    void startCpSignal(int);
+   void startSearchSignal(QStringList);
 
 public slots:
     void waitCpOver(int para)

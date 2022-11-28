@@ -121,14 +121,16 @@ void Widget::on_pushButtonStartFind_clicked()
     myctl->startCpWork();
 }
 
+void Widget::on_pushButtonStartCP_clicked()
+{
+
+}
+
+
 void Widget::on_pushButtonStopCP_clicked()
 {
 
 }
 
-void Widget::on_pushButtonStartCP_clicked()
-{
-
-}
 
 
