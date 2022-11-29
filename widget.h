@@ -33,11 +33,22 @@ private slots:
 
     void on_pushButtonStartFind_clicked();
 
+    void getsearchFile(QString str);
+
+    void hascopyFilecount(int n);
+
 private:
     Ui::Widget *ui;
 
 private:
     CpThread *myctl;
+
+    QList<QDir> srcdirList;  //原文件搜索目录
+    QStringList dstFilePathList; //目标文件list(完整路径)
+    QStringList selFileList; //筛选文件中提取出来的每行数据的list
+    QString copyDirPath;        //复制到哪个目录
+
+    bool IsRightSelFile(QString str); //是否符合筛选文件的文件
 };
 
 #endif // WIDGET_H

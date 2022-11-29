@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QThread>
 #include <QDebug>
+#include <QFileDialog>
+#include <QFile>
 
 class CpThread : public QObject
 {
@@ -13,20 +15,35 @@ public:
     CpThread(QObject * parent = 0);
     ~CpThread();
 
-   QThread mycpThread;
+    QThread mycpThread;
 
-   void startSearchWork(QStringList list);
-   void startCpWork();
+    void startSearchWork(QList<QDir> dirlist, QStringList list);
+    void startCpWork(QStringList filelist, QString dirpath);
 
 signals:
-   void startCpSignal(int);
-   void startSearchSignal(QStringList);
+    void startCpSignal(QStringList filelist, QString dirpath);
+    void startSearchSignal(QList<QDir> dirlist, QStringList list);
+    void searchFileThread(QString path);
+    void hascopyfileCountSig(int n);
 
 public slots:
+    void waitSearchOver(int para)
+    {
+        qDebug()<<"waitSearchOver";
+    }
+
     void waitCpOver(int para)
     {
-        qDebug()<<"para = "<<para<<" this is wait copy work over, and threadID:"<<QThread::currentThreadId();
+        qDebug()<<"waitCpOver";
     }
+
+    void copyFilecount(int n)
+    {
+        qDebug()<<"emit hascopyfileCountSig(hascopycnt);" <<endl;
+        emit hascopyfileCountSig(n);
+    }
+
+    void sendfindsig(QString str);
 
 };
 

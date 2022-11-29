@@ -35,3 +35,8 @@ HEADERS += \
 
 FORMS += \
         widget.ui
+
+RESOURCES += \
+    src.qrc
+
+RC_ICONS = fileDeal.ico

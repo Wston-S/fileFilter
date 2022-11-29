@@ -4,53 +4,101 @@
 #include <QDebug>
 #include <QThread>
 #include <QObject>
+#include <QFileDialog>
+#include <QFile>
 
 class MyWoker : public QObject
 {
     Q_OBJECT
 
 public:
-    MyWoker(QObject *parent = nullptr){}
+    MyWoker(){}
 
-public slots:
-    void doMyWorker(int paramter)
+    bool IsRightSelFile(QString str, QStringList list)
     {
-        while (true)
+        for(int i = 0; i < list.count(); i++)
         {
-            static int cnt = 0;
+            QString strname = list.at(i);
 
-            qDebug()<<"paramter = "<<paramter<<" do my copy work: "<<cnt++<<", my thread id is "<<QThread::currentThreadId();
-            QThread::sleep(1);
-
-            if(cnt >= 10)
+            if(str.contains(strname))
             {
-                break;
+                return true;
             }
         }
 
-        emit FinishworkSig(123);
+        return false;
     }
 
-    void doMySearchWorker(QStringList list)
+public slots:
+    void doCopyWorker(QStringList filelist, QString dirpath)
     {
-        while (true)
+        int hascopycnt = 0;
+        QFile file;
+        QString copyfile;
+
+        qDebug()<<"dirpath = "<<dirpath;
+        qDebug()<<"dirpath = "<<dirpath;
+        qDebug()<<"dirpath = "<<dirpath;
+
+        for(int i = 0; i < filelist.count(); i++)
         {
-            static int cnt = 0;
+            QString path = filelist.at(i);
+            file.setFileName(path);
 
-            qDebug()<<" do my Search work: "<<cnt++<<", my thread id is "<<QThread::currentThreadId();
-            QThread::sleep(1);
-
-            if(cnt >= 10)
+            if(file.exists())
             {
-                break;
+                QFileInfo fileinfo(file.fileName());
+                copyfile = dirpath + "/" + fileinfo.fileName();
+                //qDebug()<<"file  exist, copyfile = "<<copyfile;
+                file.copy(copyfile);
+                hascopycnt++;
+                qDebug()<<"emit hasCopyCnt(hascopycnt);" <<endl;
+                emit hasCopyCnt(hascopycnt);
+                //QThread::sleep(1);
+            }
+            else
+            {
+                qDebug()<<"file ! exist"<<endl;
             }
         }
 
-        emit FinishworkSig(1);
+        emit FinishcopyworkSig(0);
+    }
+
+    void doMySearchWorker(QList<QDir> dirlist, QStringList list)
+    {
+        qDebug()<<"doMySearchWorker"<<endl;
+
+        for(int i = 0; i < dirlist.count(); i++)
+        {
+            int j;
+
+            QFileInfoList li = dirlist.at(i).entryInfoList(QDir::Files, QDir::Name);
+            for(j = 0; j <li.count(); j++)
+            {
+                if(li[j].isFile())
+                {
+                    QString filestr = li[j].fileName();
+
+                    if(IsRightSelFile(filestr, list))
+                    {
+                        QString filestrPath = li[j].filePath();
+                        emit searchFile(filestrPath);
+                    }
+                }
+            }
+        }
+
+        emit FinishSearchworkSig(0);
     }
 
 signals:
-    void FinishworkSig(int);
+    void FinishSearchworkSig(int);
+    void FinishcopyworkSig(int);
+
+    void hasCopyCnt(int);
+
+    void searchFile(QString path);
 
 };
 

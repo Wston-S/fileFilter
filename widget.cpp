@@ -3,21 +3,25 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFile>
-
+#include "mywork.h"
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    //this->setWindowIcon(QIcon(":/fileDeal.png"));
 
     this->resize(800, 600);
-    ui->progressBar->hide();
+    //ui->progressBar->hide();
     ui->listWidgetSrcDir->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->pushButtonStartCP->setEnabled(false);
-    ui->pushButtonStopCP->setEnabled(false);
+    //ui->pushButtonStartCP->setEnabled(false);
+    //ui->pushButtonStopCP->setEnabled(false);
 
     myctl = new CpThread();
+
+    connect(myctl, SIGNAL(searchFileThread(QString)), this, SLOT(getsearchFile(QString)));
+    connect(myctl, SIGNAL(hascopyfileCountSig(int)), this, SLOT(hascopyFilecount(int)));
 }
 
 Widget::~Widget()
@@ -104,32 +108,118 @@ void Widget::on_pushButtonOpenDstDir_clicked()
 
 void Widget::on_pushButtonStartFind_clicked()
 {
+    int i;
+    QString res;
     int dircnt = ui->listWidgetSrcDir->count();
+    QString selFilePath = ui->lineEditSelFile->text();
 
-    for(int i = 0; i < dircnt; i++)
+    srcdirList.clear();
+    selFileList.clear();
+    dstFilePathList.clear();
+
+    if(dircnt < 1)
     {
-        QString strSrcPath = ui->listWidgetSrcDir->item(i)->text();
-        if(strSrcPath.isEmpty()) continue;
+        QMessageBox::information(this, tr("目录未选择"),tr("请先选择原文件目录"));
+        return;
+    }
 
-        QDir dir(strSrcPath);
-        if( dir.exists())
+    if(selFilePath.isEmpty())
+    {
+        QMessageBox::information(this, tr("筛选文件未选择"),tr("请先选择筛选文件"));
+        return;
+    }
+
+    for(i = 0; i < dircnt; i++)
+    {
+        QDir dir(ui->listWidgetSrcDir->item(i)->text());
+        if(dir.exists())
         {
-
+            srcdirList.append(dir);
+        }
+        else
+        {
+            res = tr("目录[%1]不存在").arg(ui->listWidgetSrcDir->item(i)->text());
+            QMessageBox::information(this, tr("目录不存在"), res);
+            return;
         }
     }
 
-    myctl->startCpWork();
+    QFile fileSel(selFilePath);
+    if(!fileSel.exists())
+    {
+        res = tr("筛选文件[%1]不存在").arg(selFilePath);
+        QMessageBox::information(this, tr("文件不存在"), res);
+        return;
+    }
+    else
+    {
+        if(!fileSel.open(QIODevice::ReadOnly) )
+        {
+            QMessageBox::warning(this, tr("打开文件"),
+                                 tr("打开筛选文件失败：") + fileSel.errorString());
+            return;
+        }
+        QTextStream tsIn(&fileSel);
+
+        while(!tsIn.atEnd())
+        {
+            static int i = 0;
+            QString str = tsIn.readLine().trimmed();
+            selFileList.append(str);
+        }
+    }
+
+    myctl->startSearchWork(srcdirList, selFileList);
 }
 
 void Widget::on_pushButtonStartCP_clicked()
 {
+    copyDirPath = ui->lineEditDstCPDir->text();
 
+    if(copyDirPath.isEmpty())
+    {
+        QMessageBox::information(this, tr("目录未选择"), "请选择复制到哪个目录");
+        return;
+    }
+
+    if(ui->listWidgetRes->count() < 1)
+    {
+        QMessageBox::information(this, tr("没有复制文件"), "可能还没进行文件检索");
+        return;
+    }
+
+    QDir dir(copyDirPath);
+    if(dir.exists())
+    {
+        qDebug()<<"copyDirPath = "<<copyDirPath;        
+        myctl->startCpWork(dstFilePathList, copyDirPath);
+        ui->pushButtonStartCP->setText("正在复制...");
+    }
+    else
+    {
+        QString res = tr("复制目录[%1]不存在").arg(copyDirPath);
+        QMessageBox::information(this, tr("目录不存在"), res);
+        return;
+    }
 }
-
 
 void Widget::on_pushButtonStopCP_clicked()
 {
 
+}
+
+
+void Widget::getsearchFile(QString str)
+{
+    ui->listWidgetRes->addItem(str);
+    dstFilePathList.append(str);
+}
+
+void Widget::hascopyFilecount(int n)
+{
+    qDebug()<<"n = "<<n;
+    int pro = 100*((float)n/ui->listWidgetRes->count());
+    ui->progressBar->setValue(pro);
 }
 
 

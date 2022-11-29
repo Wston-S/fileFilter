@@ -1,16 +1,24 @@
 #include "cpthread.h"
 #include "mywork.h"
+#include <QFileDialog>
+#include <QFile>
 
 CpThread::CpThread(QObject * parent) : QObject(parent)
 {
+    qRegisterMetaType<QList<QDir>>("QList<QDir>");
+
     MyWoker * mywork = new MyWoker();
 
     mywork->moveToThread(&mycpThread);
 
-    connect(mywork, SIGNAL(FinishworkSig(int)), this, SLOT(waitCpOver(int)));
+    connect(mywork, SIGNAL(hasCopyCnt(int)), this, SLOT(copyFilecount(int)));
+    connect(mywork, SIGNAL(FinishSearchworkSig(int)), this, SLOT(waitSearchOver(int)));
+    connect(mywork, SIGNAL(FinishcopyworkSig(int)), this, SLOT(waitCpOver(int)));
     connect(&mycpThread, &QThread::finished, mywork, &QObject::deleteLater);
-    connect(this, SIGNAL(startCpSignal(int)), mywork, SLOT(doMyWorker(int)));
-    connect(this, SIGNAL(startSearchSignal(QStringList)), mywork, SLOT(doMySearchWorker(int)));
+    connect(this, SIGNAL(startCpSignal(QStringList, QString)), mywork, SLOT(doCopyWorker(QStringList, QString)));
+    connect(this, SIGNAL(startSearchSignal(QList<QDir>, QStringList)), mywork, SLOT(doMySearchWorker(QList<QDir>, QStringList)));
+
+    connect(mywork, SIGNAL(searchFile(QString)), this, SLOT(sendfindsig(QString)));
 
     qDebug()<<"------QThread moveToThread Demo-----";
 
@@ -23,14 +31,21 @@ CpThread::~CpThread()
     mycpThread.wait();
 }
 
-void CpThread::startCpWork()
+void CpThread::startCpWork(QStringList filelist, QString dirpath)
 {
     qDebug()<<"startCpWork"<<endl;
-    emit startCpSignal(1);
+    emit startCpSignal(filelist, dirpath);
 }
 
-void CpThread::startSearchWork(QStringList list)
+void CpThread::startSearchWork(QList<QDir> dirlist, QStringList list)
 {
     qDebug()<<"startSearchWork"<<endl;
-    emit startSearchSignal(list);
+    emit startSearchSignal(dirlist, list);
 }
+
+void CpThread::sendfindsig(QString str)
+{
+    emit searchFileThread(str);
+}
+
+
