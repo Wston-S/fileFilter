@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include "mywork.h"
+#include <QDebug>
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -22,6 +23,51 @@ Widget::Widget(QWidget *parent) :
 
     connect(myctl, SIGNAL(searchFileThread(QString)), this, SLOT(getsearchFile(QString)));
     connect(myctl, SIGNAL(hascopyfileCountSig(int)), this, SLOT(hascopyFilecount(int)));
+
+#if 0
+    {
+        QString fileNamestr = "60059392.mpg";
+        QStringList list;
+        list.append("60059392");
+        list.append("60022");
+        list.append("2");
+
+        {
+            QString s1 = "1234";
+            QString s2 = "1234";
+
+            if(!s1.compare(s2))
+            {
+                qDebug()<<"Yes";
+            }
+            else
+            {
+                qDebug()<<"No";
+            }
+        }
+
+        QStringList ll = fileNamestr.split(".");
+        for(int i = 0; i < ll.count(); i++)
+        {
+            qDebug()<<i<<":"<<ll.at(i);
+        }
+
+        for(int i = 0; i < list.count(); i++)
+        {
+            QString strname = list.at(i);
+
+            if(fileNamestr.contains(strname))  //fileNamestr中是都包含strname
+            {
+                qDebug()<<"has:"<<strname;
+            }
+            else
+            {
+                qDebug()<<"hasn't"<<strname;
+            }
+        }
+    }
+#endif
+
 }
 
 Widget::~Widget()
@@ -37,10 +83,7 @@ void Widget::on_pushButtonAddDir_clicked()
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
 
-   if( dirStr.isEmpty() )
-   {
-       return;
-   }
+   if( dirStr.isEmpty())return;
 
    //去掉重复的路径
    int i;
@@ -64,10 +107,7 @@ void Widget::on_pushButtonDelDir_clicked()
 {
     int nCurRow = ui->listWidgetSrcDir->currentRow();
 
-    if( nCurRow < 0)
-    {
-        return;
-    }
+    if( nCurRow < 0) return;
 
     ui->listWidgetSrcDir->takeItem( nCurRow );
 }
@@ -80,7 +120,7 @@ void Widget::on_pushButtonOpenSelFile_clicked()
                 tr("."),
                 tr("Text files(*.txt);;All files(*)")
                 );
-    if( strSelName.isEmpty() )
+    if(strSelName.isEmpty())
     {
         return;
     }
@@ -98,10 +138,7 @@ void Widget::on_pushButtonOpenDstDir_clicked()
                                                     QFileDialog::ShowDirsOnly
                                                     | QFileDialog::DontResolveSymlinks);
 
-   if( dstDirStr.isEmpty() )
-   {
-       return;
-   }
+   if( dstDirStr.isEmpty())return;
 
    ui->lineEditDstCPDir->setText(dstDirStr);
 }
@@ -153,7 +190,7 @@ void Widget::on_pushButtonStartFind_clicked()
     }
     else
     {
-        if(!fileSel.open(QIODevice::ReadOnly) )
+        if(!fileSel.open(QIODevice::ReadOnly))
         {
             QMessageBox::warning(this, tr("打开文件"),
                                  tr("打开筛选文件失败：") + fileSel.errorString());

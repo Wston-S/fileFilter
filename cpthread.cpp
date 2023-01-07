@@ -20,8 +20,6 @@ CpThread::CpThread(QObject * parent) : QObject(parent)
 
     connect(mywork, SIGNAL(searchFile(QString)), this, SLOT(sendfindsig(QString)));
 
-    qDebug()<<"------QThread moveToThread Demo-----";
-
     mycpThread.start();
 }
 
@@ -33,13 +31,11 @@ CpThread::~CpThread()
 
 void CpThread::startCpWork(QStringList filelist, QString dirpath)
 {
-    qDebug()<<"startCpWork"<<endl;
     emit startCpSignal(filelist, dirpath);
 }
 
 void CpThread::startSearchWork(QList<QDir> dirlist, QStringList list)
 {
-    qDebug()<<"startSearchWork"<<endl;
     emit startSearchSignal(dirlist, list);
 }
 

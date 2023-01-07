@@ -29,12 +29,12 @@ signals:
 public slots:
     void waitSearchOver(int para)
     {
-        qDebug()<<"waitSearchOver";
+        qDebug()<<"检索完成";
     }
 
     void waitCpOver(int para)
     {
-        qDebug()<<"waitCpOver";
+        qDebug()<<"复制完成";
     }
 
     void copyFilecount(int n)

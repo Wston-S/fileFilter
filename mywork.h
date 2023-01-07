@@ -14,13 +14,21 @@ class MyWoker : public QObject
 public:
     MyWoker(){}
 
+    /* 帅选条件，文件名字为str的文件是否再列表list中 */
     bool IsRightSelFile(QString str, QStringList list)
     {
+        QString fileName;
+        QStringList ll = str.split(".");
+        if(ll.count()>=1)
+        {
+            fileName =ll[0];
+        }
+
         for(int i = 0; i < list.count(); i++)
         {
             QString strname = list.at(i);
 
-            if(str.contains(strname))
+            if(!fileName.compare(strname))
             {
                 return true;
             }
@@ -36,10 +44,6 @@ public slots:
         QFile file;
         QString copyfile;
 
-        qDebug()<<"dirpath = "<<dirpath;
-        qDebug()<<"dirpath = "<<dirpath;
-        qDebug()<<"dirpath = "<<dirpath;
-
         for(int i = 0; i < filelist.count(); i++)
         {
             QString path = filelist.at(i);
@@ -49,16 +53,9 @@ public slots:
             {
                 QFileInfo fileinfo(file.fileName());
                 copyfile = dirpath + "/" + fileinfo.fileName();
-                //qDebug()<<"file  exist, copyfile = "<<copyfile;
                 file.copy(copyfile);
                 hascopycnt++;
-                qDebug()<<"emit hasCopyCnt(hascopycnt);" <<endl;
                 emit hasCopyCnt(hascopycnt);
-                //QThread::sleep(1);
-            }
-            else
-            {
-                qDebug()<<"file ! exist"<<endl;
             }
         }
 
@@ -67,8 +64,6 @@ public slots:
 
     void doMySearchWorker(QList<QDir> dirlist, QStringList list)
     {
-        qDebug()<<"doMySearchWorker"<<endl;
-
         for(int i = 0; i < dirlist.count(); i++)
         {
             int j;
@@ -95,9 +90,7 @@ public slots:
 signals:
     void FinishSearchworkSig(int);
     void FinishcopyworkSig(int);
-
     void hasCopyCnt(int);
-
     void searchFile(QString path);
 
 };
